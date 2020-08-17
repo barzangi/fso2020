@@ -1,45 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import Filter from './components/Filter';
+import PersonForm from './components/PersonForm';
+import Persons from './components/Persons';
 
-const Filter = ({ filterText, filterTextInputHandler }) => (
-  <div>
-    filter show with <input type='text' onChange={filterTextInputHandler} value={filterText} />
-  </div>
-);
-
-const PersonForm = ({ addPerson, nameInputHander, newName, numberInputHandler, newNumber }) => {
-  return (
-    <>
-      <h2>Add a person</h2>
-      <form onSubmit={addPerson}>
-        <div>
-          name: <input onChange={nameInputHander} value={newName} />
-        </div>
-        <div>number: <input onChange={numberInputHandler} value={newNumber} /></div>
-        <div>
-          <button type='submit'>add</button>
-        </div>
-      </form>
-    </>
-  );
-};
-
-const Person = ({ person, filterText }) => {
-  return (
-    person.name.toLowerCase().includes(filterText.toLowerCase())
-    ? <div>{person.name} {person.number}</div>
-    : null
-  );
-};
-
-const Persons = ({ persons, filterText }) => {
-  return (
-    <>
-      <h2>Numbers</h2>
-      {persons.map(person => <Person key={person.name} person={person} filterText={filterText} />)}
-    </>
-  );
-};
+import personService from './services/persons';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -48,23 +12,55 @@ const App = () => {
   const [filterText, setFilterText] = useState('');
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data);
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons);
       });
   }, []);
 
   const addPerson = (event) => {
     event.preventDefault();
-    if (persons.find(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
+    if (persons.find(person => person.name.toLowerCase() === newName.toLowerCase())) {
+      updatePerson(newName, newNumber)
     } else {
-      const personObject = { name: newName, number: newNumber };
-      setPersons(persons.concat(personObject));
+      const newPerson = { name: newName, number: newNumber };
+      personService
+        .create(newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson));
+        });
     } 
     setNewName('');
     setNewNumber('');
+  };
+
+  const updatePerson = (newName, newNumber) => {
+    if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+      const id = persons.filter(person => person.name.toLowerCase() === newName.toLowerCase())[0].id;
+      const updatedPerson = {
+        name: newName,
+        number: newNumber
+      };
+      personService
+        .update(id, updatedPerson)
+        .then(returnedPerson => {
+          setPersons(persons.map(p => p.id !== id ? p : returnedPerson));
+        })
+        .catch(error => {
+          alert(`${newName} was already deleted from server`);
+        });
+    }
+  };
+
+  const destroyPerson = person => {
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personService
+      .destroy(person.id)
+      .then(response => {
+        setPersons(persons.filter(p => p.id !== person.id));
+      });
+    }
   };
 
   const nameInputHander = (event) => {
@@ -90,7 +86,7 @@ const App = () => {
         numberInputHandler={numberInputHandler}
         newNumber={newNumber}
       />
-      <Persons persons={persons} filterText={filterText} />
+      <Persons persons={persons} filterText={filterText} destroyPerson={destroyPerson} />
     </>
   );
 };
