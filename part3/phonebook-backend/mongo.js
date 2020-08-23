@@ -27,6 +27,7 @@ if (process.argv.length === 4) {
 }
 
 if (process.argv.length === 3) {
+  // If only password entered, list all phonebook entries
   Person.find({}).then(result => {
     console.log('Phonebook:');
     result.forEach(person => {
@@ -35,6 +36,7 @@ if (process.argv.length === 3) {
     mongoose.connection.close();
   });
 } else {
+  // Add new person to phonebook
   const person = new Person({
     name: process.argv[3],
     number: process.argv[4]
