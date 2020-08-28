@@ -35,6 +35,12 @@ const App = () => {
       });
   }, []);
 
+  const clearNotification = (time) => {
+    setTimeout(() => {
+      setNotification({ message: null });
+    }, time);
+  };
+
   const addPerson = (event) => {
     event.preventDefault();
     if (persons.find(person => person.name.toLowerCase() === newName.toLowerCase())) {
@@ -49,10 +55,15 @@ const App = () => {
             message: `Added ${returnedPerson.name}`,
             type: true
           });
-          setTimeout(() => {
-            setNotification({ message: null });
-          }, 4000);
-        });
+          clearNotification(4000);
+        })
+        .catch(error => {
+          setNotification({
+            message: error.response.data.error,
+            type: false
+          });
+          clearNotification(4000);
+        })
     }
     setNewName('');
     setNewNumber('');
@@ -61,6 +72,7 @@ const App = () => {
   const updatePerson = (newName, newNumber) => {
     if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
       const id = persons.filter(person => person.name.toLowerCase() === newName.toLowerCase())[0].id;
+      console.log('id:', id);
       const updatedPerson = {
         name: newName,
         number: newNumber
@@ -73,19 +85,15 @@ const App = () => {
             message: `Updated ${newName}'s number to ${newNumber}`,
             type: true
           });
-          setTimeout(() => {
-            setNotification({ message: null });
-          }, 4000);
+          clearNotification(4000);
         })
         .catch(error => {
+          console.log(error.response.data.error);
           setNotification({
-            message: `Info on ${newName} has already been removed from server`,
+            message: error.response.data.error,
             type: false
           });
-          setTimeout(() => {
-            setNotification({ message: null });
-          }, 4000);
-          setPersons(persons.filter(p => p.id !== id));
+          clearNotification(4000);
         });
     }
   };
@@ -100,9 +108,7 @@ const App = () => {
           message: `Deleted ${person.name}`,
           type: true
         });
-        setTimeout(() => {
-          setNotification({ message: null });
-        }, 4000);
+        clearNotification(4000);
       });
     }
   };
