@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Blog from './components/Blog';
+import LoginForm from './components/LoginForm';
+import BlogForm from './components/BlogForm';
+import Togglable from './components/Togglable';
+
 import blogService from './services/blogs';
 import loginService from './services/login';
 
@@ -22,13 +26,10 @@ const App = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [url, setUrl] = useState('');
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs(blogs)
+      setBlogs(blogs.sort((a, b) => b.likes - a.likes))
     );
   }, []);
 
@@ -41,81 +42,68 @@ const App = () => {
     }
   }, []);
 
-  const addBlog = async (event) => {
-    event.preventDefault();
-    const blogObj = {
-      title: title,
-      author: author,
-      url: url
+  const addBlog = async (blogObj) => {
+    try {
+      blogFormRef.current.toggleVisibility();
+      let returnedBlog = await blogService.create(blogObj);
+      returnedBlog = {
+        ...returnedBlog,
+        user: {
+          username: user.username,
+          name: user.name,
+          id: returnedBlog.id
+        }
+      };
+      setBlogs(blogs.concat(returnedBlog));
+      setNotificationMessage(`Added new blog "${returnedBlog.title}" by ${returnedBlog.author}`);
+      setNotificationType(true);
+      setTimeout(() => {
+        setNotificationMessage(null);
+      }, 4000);
+    } catch (exception) {
+      setNotificationMessage('Content missing');
+      setNotificationType(false);
+      setTimeout(() => {
+        setNotificationMessage(null);
+      }, 4000);
+    };
+  };
+
+  const addLike = async id => {
+    const blog = blogs.find(b => b.id === id);
+    const changedBlog = {
+      ...blog,
+      likes: blog.likes + 1
     };
 
-    const returnedBlog = await blogService.create(blogObj);
-    setBlogs(blogs.concat(returnedBlog));
-    setTitle('');
-    setAuthor('');
-    setUrl('');
-    setNotificationMessage(`Added new blog "${returnedBlog.title}" by ${returnedBlog.author}`);
-    setNotificationType(true);
-    setTimeout(() => {
-      setNotificationMessage(null);
-    }, 4000);
+    await blogService.update(id, changedBlog);
+    setBlogs(blogs.map(b => b.id !== id ? b : changedBlog).sort((a, b) => b.likes - a.likes));
+  };
+
+  const destroyBlog = async blog => {
+    const confirmDelete = window.confirm(`Remove blog "${blog.title}" by ${blog.author}?`);
+    if (confirmDelete) {
+      await blogService.destroy(blog.id);
+      setBlogs(blogs.filter(b => b.id !== blog.id));
+    }
   };
 
   const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        Username{' '}
-          <input
-          type='text'
-          value={username}
-          name='Username'
-          onChange={({ target }) => setUsername(target.value)}
-          />
-      </div>
-      <div>
-        Password{' '}
-          <input
-          type='password'
-          value={password}
-          name='Password'
-          onChange={({ target }) => setPassword(target.value)}
-          />
-      </div>
-      <button type='submit'>Login</button>
-    </form>
+    <LoginForm
+      username={username}
+      password={password}
+      handleUsernameChange={({ target }) => setUsername(target.value)}
+      handlePasswordChange={({ target }) => setPassword(target.value)}
+      handleSubmit={handleLogin}
+    />
   );
 
+  const blogFormRef = useRef();
+
   const blogForm = () => (
-    <form onSubmit={addBlog}>
-      <div>
-        Title{' '}
-        <input
-        type='text'
-        value={title}
-        name='Title'
-        onChange={({ target }) => setTitle(target.value)}
-        />
-      </div>
-      <div>
-        Author{' '}
-        <input
-        type='text'
-        value={author}
-        name='Author'
-        onChange={({ target }) => setAuthor(target.value)}
-        />
-      </div>
-      <div>
-        URL{' '}
-        <input
-        type='text'
-        value={url}
-        name='URL'
-        onChange={({ target }) => setUrl(target.value)}
-        />
-      </div>
-      <button type='submit'>Save</button>
-    </form>
+    <Togglable buttonLabel='New blog' ref={blogFormRef}>
+      <BlogForm createBlog={addBlog} />
+    </Togglable>
   );
 
   const handleLogin = async (event) => {
@@ -155,13 +143,17 @@ const App = () => {
         : <div>
             <p>{user.name} logged in <button onClick={() => handleLogout()}>Logout</button></p>
             {blogForm()}
+            {blogs.map(blog =>
+              <Blog
+                key={blog.id}
+                blog={blog}
+                addLike={() => addLike(blog.id)}
+                destroyBlog={() => destroyBlog(blog)}
+                user={user}
+              />
+            )}
           </div>
       }
-      <ul>
-        {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} />
-        )}
-      </ul>
     </div>
   );
 };
