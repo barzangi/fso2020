@@ -11,7 +11,7 @@ const Notification = ({ message, type }) => {
   if (message === null) return null;
   const style = {
     color: type === true ? 'green' : 'red'
-  }
+  };
   return (
     <div className='message' style={style}>
       {message}
@@ -66,7 +66,7 @@ const App = () => {
       setTimeout(() => {
         setNotificationMessage(null);
       }, 4000);
-    };
+    }
   };
 
   const addLike = async id => {
@@ -126,7 +126,7 @@ const App = () => {
       setTimeout(() => {
         setNotificationMessage(null);
       }, 4000);
-    };
+    }
   };
 
   const handleLogout = () => {
@@ -141,18 +141,18 @@ const App = () => {
       {user === null
         ? loginForm()
         : <div>
-            <p>{user.name} logged in <button onClick={() => handleLogout()}>Logout</button></p>
-            {blogForm()}
-            {blogs.map(blog =>
-              <Blog
-                key={blog.id}
-                blog={blog}
-                addLike={() => addLike(blog.id)}
-                destroyBlog={() => destroyBlog(blog)}
-                user={user}
-              />
-            )}
-          </div>
+          <p>{user.name} logged in <button onClick={() => handleLogout()}>Logout</button></p>
+          {blogForm()}
+          {blogs.map(blog =>
+            <Blog
+              key={blog.id}
+              blog={blog}
+              addLike={() => addLike(blog.id)}
+              destroyBlog={() => destroyBlog(blog)}
+              user={user}
+            />
+          )}
+        </div>
       }
     </div>
   );
