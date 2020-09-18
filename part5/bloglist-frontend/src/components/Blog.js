@@ -10,7 +10,7 @@ const Blog = ({ blog, addLike, destroyBlog, user }) => {
     border: 'solid',
     borderWidth: 1,
     marginTop: 10
-  }
+  };
 
   const expandStyle = {
     display: expand ? '' : 'none'
@@ -29,7 +29,7 @@ const Blog = ({ blog, addLike, destroyBlog, user }) => {
             {expand ? 'hide' : 'show'}
           </button>
         </div>
-        <div style={expandStyle}>
+        <div style={expandStyle} className='moreInfoContainer'>
           <div>Likes: {blog.likes} <button onClick={addLike}>Like</button></div>
           <div>Posted by {blog.user.name}</div>
           <div style={deleteStyle}>
