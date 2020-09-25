@@ -25,15 +25,15 @@ const Blog = ({ blog, addLike, destroyBlog, user }) => {
       <div style={blogStyle}>
         <div>
           <a href={blog.url}>{blog.title}</a> by {blog.author}{' '}
-          <button onClick={() => setExpand(!expand)}>
+          <button id='show-hide' onClick={() => setExpand(!expand)}>
             {expand ? 'hide' : 'show'}
           </button>
         </div>
         <div style={expandStyle} className='moreInfoContainer'>
-          <div>Likes: {blog.likes} <button onClick={addLike}>Like</button></div>
+          <div>Likes: {blog.likes} <button id='like' onClick={addLike}>Like</button></div>
           <div>Posted by {blog.user.name}</div>
           <div style={deleteStyle}>
-            <button onClick={destroyBlog}>Delete</button>
+            <button id='delete' onClick={destroyBlog}>Delete</button>
           </div>
         </div>
       </div>

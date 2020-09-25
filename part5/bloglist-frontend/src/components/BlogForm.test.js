@@ -22,7 +22,7 @@ test('<BlogForm /> calls onSubmit and updates parent state with correct field va
     target: { value: 'Michael Chan' }
   });
   fireEvent.change(url, {
-    target: { value: 'https://reactpatterns.com/'}
+    target: { value: 'https://reactpatterns.com/' }
   });
   fireEvent.submit(form);
 

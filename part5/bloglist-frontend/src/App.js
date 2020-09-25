@@ -141,7 +141,7 @@ const App = () => {
       {user === null
         ? loginForm()
         : <div>
-          <p>{user.name} logged in <button onClick={() => handleLogout()}>Logout</button></p>
+          <p>{user.name} logged in <button id='logout' onClick={() => handleLogout()}>Logout</button></p>
           {blogForm()}
           {blogs.map(blog =>
             <Blog
