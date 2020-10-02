@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { vote } from '../reducers/anecdoteReducer';
 import { setNotification, clearNotification } from '../reducers/notificationReducer';
+import anecdoteService from '../services/anecdotes';
 
 const AnecdoteList = () => {
   const dispatch = useDispatch();
@@ -14,7 +15,12 @@ const AnecdoteList = () => {
     marginBottom: 20
   };
 
-  const doVote = (anecdote) => {
+  const doVote = async (anecdote) => {
+    const changedAnecdote = {
+      ...anecdote,
+      votes: anecdote.votes + 1
+    };
+    await anecdoteService.updateAnecdote(anecdote.id, changedAnecdote);
     dispatch(vote(anecdote.id));
     dispatch(setNotification(anecdote.content));
     setTimeout(() => {
