@@ -7,13 +7,18 @@ const notificationReducer = (state = '', action) => {
   }
 };
 
+let timeoutId;
+
 export const setNotification = (message, delay) => {
   return async dispatch => {
     dispatch({
       type: 'SET_NOTIFICATION',
       notification: `You voted "${message}"`
     });
-    setTimeout(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => {
       dispatch({
         type: 'SET_NOTIFICATION',
         notification: ''
