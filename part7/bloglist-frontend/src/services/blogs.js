@@ -8,9 +8,9 @@ const setToken = newToken => {
 };
 
 // get all blogs
-const getAll = () => {
-  const request = axios.get(baseUrl);
-  return request.then(response => response.data);
+const getAll = async () => {
+  const response = await axios.get(baseUrl);
+  return response.data;
 };
 
 // add blog

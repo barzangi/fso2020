@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import Blog from './components/Blog';
+import BlogList from './components/BlogList';
 import LoginForm from './components/LoginForm';
 import BlogForm from './components/BlogForm';
 import Togglable from './components/Togglable';
@@ -10,9 +10,9 @@ import blogService from './services/blogs';
 import loginService from './services/login';
 
 import { setNotification } from './reducers/notificationReducer';
+import { initBlogs, newBlog } from './reducers/blogsReducer';
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
@@ -20,10 +20,8 @@ const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs.sort((a, b) => b.likes - a.likes))
-    );
-  }, []);
+    dispatch(initBlogs());
+  }, [dispatch]);
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogsAppUser');
@@ -46,7 +44,7 @@ const App = () => {
           id: returnedBlog.id
         }
       };
-      setBlogs(blogs.concat(returnedBlog));
+      dispatch(newBlog(returnedBlog));
       dispatch(setNotification(
         `Added new blog "${returnedBlog.title}" by ${returnedBlog.author}`,
         true,
@@ -58,25 +56,6 @@ const App = () => {
         false,
         4
       ));
-    }
-  };
-
-  const addLike = async id => {
-    const blog = blogs.find(b => b.id === id);
-    const changedBlog = {
-      ...blog,
-      likes: blog.likes + 1
-    };
-
-    await blogService.update(id, changedBlog);
-    setBlogs(blogs.map(b => b.id !== id ? b : changedBlog).sort((a, b) => b.likes - a.likes));
-  };
-
-  const destroyBlog = async blog => {
-    const confirmDelete = window.confirm(`Remove blog "${blog.title}" by ${blog.author}?`);
-    if (confirmDelete) {
-      await blogService.destroy(blog.id);
-      setBlogs(blogs.filter(b => b.id !== blog.id));
     }
   };
 
@@ -135,15 +114,7 @@ const App = () => {
         : <div>
           <p>{user.name} logged in <button id='logout' onClick={() => handleLogout()}>Logout</button></p>
           {blogForm()}
-          {blogs.map(blog =>
-            <Blog
-              key={blog.id}
-              blog={blog}
-              addLike={() => addLike(blog.id)}
-              destroyBlog={() => destroyBlog(blog)}
-              user={user}
-            />
-          )}
+          <BlogList user={user} />
         </div>
       }
     </div>
