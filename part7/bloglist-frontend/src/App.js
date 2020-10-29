@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+
 import BlogList from './components/BlogList';
+import UserList from './components/UserList';
 import LoginForm from './components/LoginForm';
 import BlogForm from './components/BlogForm';
 import Togglable from './components/Togglable';
@@ -12,6 +15,7 @@ import loginService from './services/login';
 import { setNotification } from './reducers/notificationReducer';
 import { initBlogs, newBlog } from './reducers/blogsReducer';
 import { setUser } from './reducers/userReducer';
+import { initUsers } from './reducers/usersReducer';
 
 const App = () => {
   const [username, setUsername] = useState('');
@@ -22,14 +26,17 @@ const App = () => {
 
   useEffect(() => {
     dispatch(initBlogs());
+    dispatch(initUsers());
   }, [dispatch]);
 
   useEffect(() => {
-    if (user) {
-      blogService.setToken(user.token);
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogsAppUser');
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON);
       dispatch(setUser(user));
+      blogService.setToken(user.token);
     }
-  }, [dispatch, user]);
+  }, [dispatch]);
 
   const addBlog = async (blogObj) => {
     try {
@@ -104,19 +111,34 @@ const App = () => {
     window.localStorage.removeItem('loggedBlogsAppUser');
   };
 
+  const padding = {
+    padding: 5
+  };
+
   return (
-    <div>
-      <h2>Blogs</h2>
-      <Notification />
-      {user === null
-        ? loginForm()
-        : <div>
-          <p>{user.name} logged in <button id='logout' onClick={() => handleLogout()}>Logout</button></p>
-          {blogForm()}
-          <BlogList />
-        </div>
-      }
-    </div>
+    <>
+      <Router>
+        <h1>Blogs App</h1>
+        <Notification />
+        {user === null
+          ? loginForm()
+          : <div>
+            <Link style={padding} to='/'>Home</Link>
+            <Link style={padding} to='/users'>Users</Link>
+            <p>{user.name} logged in <button id='logout' onClick={() => handleLogout()}>Logout</button></p>
+            <Switch>
+              <Route path='/users'>
+                <UserList />
+              </Route>
+              <Route path='/'>
+                {blogForm()}
+                <BlogList />
+              </Route>
+            </Switch>
+          </div>
+        }
+      </Router>
+    </>
   );
 };
 
