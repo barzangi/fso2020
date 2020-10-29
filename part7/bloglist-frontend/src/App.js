@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { Switch, Route, Link, useRouteMatch } from 'react-router-dom';
 
 import BlogList from './components/BlogList';
 import UserList from './components/UserList';
+import User from './components/User';
 import LoginForm from './components/LoginForm';
 import BlogForm from './components/BlogForm';
 import Togglable from './components/Togglable';
@@ -23,6 +24,7 @@ const App = () => {
 
   const dispatch = useDispatch();
   const user = useSelector(state => state.user);
+  const users = useSelector(state => state.users);
 
   useEffect(() => {
     dispatch(initBlogs());
@@ -115,29 +117,35 @@ const App = () => {
     padding: 5
   };
 
+  const match = useRouteMatch('/users/:id');
+  const matchedUser = match
+    ? users.find(user => user.id === match.params.id)
+    : null;
+
   return (
     <>
-      <Router>
-        <h1>Blogs App</h1>
-        <Notification />
-        {user === null
-          ? loginForm()
-          : <div>
-            <Link style={padding} to='/'>Home</Link>
-            <Link style={padding} to='/users'>Users</Link>
-            <p>{user.name} logged in <button id='logout' onClick={() => handleLogout()}>Logout</button></p>
-            <Switch>
-              <Route path='/users'>
-                <UserList />
-              </Route>
-              <Route path='/'>
-                {blogForm()}
-                <BlogList />
-              </Route>
-            </Switch>
-          </div>
-        }
-      </Router>
+      <h1>Blogs App</h1>
+      <Notification />
+      {user === null
+        ? loginForm()
+        : <div>
+          <Link style={padding} to='/'>Home</Link>
+          <Link style={padding} to='/users'>Users</Link>
+          <p>{user.name} logged in <button id='logout' onClick={() => handleLogout()}>Logout</button></p>
+          <Switch>
+            <Route path='/users/:id'>
+              <User user={matchedUser} />
+            </Route>
+            <Route path='/users'>
+              <UserList />
+            </Route>
+            <Route path='/'>
+              {blogForm()}
+              <BlogList />
+            </Route>
+          </Switch>
+        </div>
+      }
     </>
   );
 };
