@@ -5,6 +5,7 @@ import { Switch, Route, Link, useRouteMatch } from 'react-router-dom';
 import BlogList from './components/BlogList';
 import UserList from './components/UserList';
 import User from './components/User';
+import Blog from './components/Blog';
 import LoginForm from './components/LoginForm';
 import BlogForm from './components/BlogForm';
 import Togglable from './components/Togglable';
@@ -25,6 +26,7 @@ const App = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.user);
   const users = useSelector(state => state.users);
+  const blogs = useSelector(state => state.blogs);
 
   useEffect(() => {
     dispatch(initBlogs());
@@ -117,9 +119,14 @@ const App = () => {
     padding: 5
   };
 
-  const match = useRouteMatch('/users/:id');
-  const matchedUser = match
-    ? users.find(user => user.id === match.params.id)
+  const userMatch = useRouteMatch('/users/:id');
+  const matchedUser = userMatch
+    ? users.find(user => user.id === userMatch.params.id)
+    : null;
+
+  const blogMatch = useRouteMatch('/blogs/:id');
+  const matchedBlog = blogMatch
+    ? blogs.find(blog => blog.id === blogMatch.params.id)
     : null;
 
   return (
@@ -135,6 +142,9 @@ const App = () => {
           <Switch>
             <Route path='/users/:id'>
               <User user={matchedUser} />
+            </Route>
+            <Route path='/blogs/:id'>
+              <Blog blog={matchedBlog} />
             </Route>
             <Route path='/users'>
               <UserList />
