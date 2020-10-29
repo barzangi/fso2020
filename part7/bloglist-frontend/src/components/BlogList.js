@@ -5,8 +5,9 @@ import { like, destroyBlog } from '../reducers/blogsReducer';
 
 import Blog from './Blog';
 
-const BlogList = ({ user }) => {
+const BlogList = () => {
   const dispatch = useDispatch();
+  const user = useSelector(state => state.user);
   const blogs = useSelector(state => state.blogs)
     .sort((a, b) => b.likes - a.likes);
 
