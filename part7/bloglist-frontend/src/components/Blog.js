@@ -5,6 +5,11 @@ import { useHistory } from 'react-router-dom';
 import { like, destroyBlog, addComment } from '../reducers/blogsReducer';
 import { setNotification } from '../reducers/notificationReducer';
 
+import {
+  TextField,
+  Button
+} from '@material-ui/core';
+
 const Blog = ({ blog }) => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -26,8 +31,8 @@ const Blog = ({ blog }) => {
     const confirmDelete = window.confirm(`Remove blog "${blog.title}" by ${blog.author}?`);
     if (confirmDelete) {
       dispatch(destroyBlog(blog.id));
+      history.push('/');
     }
-    history.push('/');
   };
 
   const createComment = (event) => {
@@ -44,23 +49,25 @@ const Blog = ({ blog }) => {
     }
   };
 
+  const padding = {
+    paddingTop: 5,
+    paddingBottom: 5
+  };
+
   return (
     <>
       <h2>{blog.title} by {blog.author}</h2>
-      <div>Visit: <a href={blog.url}>{blog.url}</a></div>
-      <div>Likes: {blog.likes} <button id='like' onClick={addLike}>Like</button></div>
-      <div>Posted by {blog.user.name}</div>
+      <div style={padding}>Visit: <a href={blog.url}>{blog.url}</a></div>
+      <div style={padding}>Likes: {blog.likes} <Button id='like' size='small' variant='contained' color='secondary' onClick={addLike}>Like</Button></div>
+      <div style={padding}>Posted by {blog.user.name}</div>
       <div style={deleteStyle}>
-        <button id='delete' onClick={deleteBlog}>Delete</button>
+        <div style={padding}>
+          <Button id='delete' size='small' variant='contained' color='secondary' onClick={deleteBlog}>
+            Delete
+          </Button>
+        </div>
       </div>
       <h3>Comments</h3>
-      <form onSubmit={createComment}>
-        <input
-          type='text'
-          value={comment}
-          onChange={({ target }) => setComment(target.value)} />{' '}
-        <button type='submit'>Add comment</button>
-      </form>
       {blog.comments.length === 0
         ? null
         : <ul>
@@ -69,6 +76,17 @@ const Blog = ({ blog }) => {
           )}
         </ul>
       }
+      <form onSubmit={createComment}>
+        <div style={padding}>
+          <TextField
+            label='New Comment'
+            type='text'
+            value={comment}
+            onChange={({ target }) => setComment(target.value)}
+          />
+        </div>
+        <Button size='small' variant='contained' color='primary' type='submit'>Add comment</Button>
+      </form>
     </>
   );
 };

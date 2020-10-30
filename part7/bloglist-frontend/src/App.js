@@ -19,7 +19,43 @@ import { initBlogs, newBlog } from './reducers/blogsReducer';
 import { setUser } from './reducers/userReducer';
 import { initUsers } from './reducers/usersReducer';
 
+import {
+  Container,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Button
+} from '@material-ui/core';
+
 const Menu = ({ user, handleLogout }) => {
+  const loggedUserStyle = {
+    marginLeft: 10,
+    marginRight: 10,
+    fontStyle: 'italic'
+  };
+
+  const navStyle = {
+    marginBottom: 10
+  };
+
+  return (
+    <AppBar position='static' style={navStyle}>
+      <Toolbar>
+        <IconButton edge='start' color='inherit' aria-label='menu'></IconButton>
+        <Button color='inherit' component={Link} to='/'>
+          Home
+        </Button>
+        <Button color='inherit' component={Link} to='/users'>
+          Users
+        </Button>
+        <span style={loggedUserStyle}>{user.name} logged in</span>
+        <Button color='inherit' onClick={handleLogout}>
+          Logout
+        </Button>
+      </Toolbar>
+    </AppBar>
+  );
+  /*
   const menu = {
     backgroundColor: 'lightgrey',
     padding: 10,
@@ -37,6 +73,7 @@ const Menu = ({ user, handleLogout }) => {
       </span>
     </div>
   );
+  */
 };
 
 const App = () => {
@@ -146,7 +183,7 @@ const App = () => {
     : null;
 
   return (
-    <>
+    <Container>
       <h1>Blogs App</h1>
       <Notification />
       {user === null
@@ -170,7 +207,7 @@ const App = () => {
           </Switch>
         </div>
       }
-    </>
+    </Container>
   );
 };
 

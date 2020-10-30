@@ -2,6 +2,16 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
+import {
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper
+} from '@material-ui/core';
+
 const BlogList = () => {
   const blogs = useSelector(state => state.blogs)
     .sort((a, b) => b.likes - a.likes);
@@ -9,13 +19,28 @@ const BlogList = () => {
   return (
     <>
       <h2>Blogs</h2>
-      <ul>
-        {blogs.map(blog =>
-          <li key={blog.id}>
-            <Link to={`/blogs/${blog.id}`}>{blog.title}</Link> by {blog.author}
-          </li>
-        )}
-      </ul>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Title</TableCell>
+              <TableCell>Author</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {blogs.map(blog =>
+              <TableRow key={blog.id}>
+                <TableCell>
+                  <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+                </TableCell>
+                <TableCell>
+                  {blog.author}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </>
   );
 };

@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 
+import {
+  TextField,
+  Button
+} from '@material-ui/core';
+
 const BlogForm = ({ createBlog }) => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -17,13 +22,18 @@ const BlogForm = ({ createBlog }) => {
     setUrl('');
   };
 
+  const padding = {
+    paddingTop: 5,
+    paddingBottom: 5
+  };
+
   return (
     <>
       <h2>Create new blog</h2>
       <form onSubmit={addBlog}>
-        <div>
-          Title{' '}
-          <input
+        <div style={padding}>
+          <TextField
+            label='Title'
             id='title'
             type='text'
             value={title}
@@ -31,9 +41,9 @@ const BlogForm = ({ createBlog }) => {
             onChange={({ target }) => setTitle(target.value)}
           />
         </div>
-        <div>
-          Author{' '}
-          <input
+        <div style={padding}>
+          <TextField
+            label='Author'
             id='author'
             type='text'
             value={author}
@@ -41,9 +51,9 @@ const BlogForm = ({ createBlog }) => {
             onChange={({ target }) => setAuthor(target.value)}
           />
         </div>
-        <div>
-          URL{' '}
-          <input
+        <div style={padding}>
+          <TextField
+            label='URL'
             id='url'
             type='text'
             value={url}
@@ -51,7 +61,7 @@ const BlogForm = ({ createBlog }) => {
             onChange={({ target }) => setUrl(target.value)}
           />
         </div>
-        <button type='submit'>Save</button>
+        <Button size='small' variant='contained' color='primary' type='submit'>Save</Button>
       </form>
     </>
   );
