@@ -19,6 +19,26 @@ import { initBlogs, newBlog } from './reducers/blogsReducer';
 import { setUser } from './reducers/userReducer';
 import { initUsers } from './reducers/usersReducer';
 
+const Menu = ({ user, handleLogout }) => {
+  const menu = {
+    backgroundColor: 'lightgrey',
+    padding: 10,
+    marginBottom: 15
+  };
+  const menuItem = {
+    margin: 5
+  };
+  return (
+    <div style={menu}>
+      <Link style={menuItem} to='/'>Home</Link>
+      <Link style={menuItem} to='/users'>Users</Link>
+      <span style={menuItem}>
+        {user.name} logged in <button id='logout' onClick={handleLogout}>Logout</button>
+      </span>
+    </div>
+  );
+};
+
 const App = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -115,10 +135,6 @@ const App = () => {
     window.localStorage.removeItem('loggedBlogsAppUser');
   };
 
-  const padding = {
-    padding: 5
-  };
-
   const userMatch = useRouteMatch('/users/:id');
   const matchedUser = userMatch
     ? users.find(user => user.id === userMatch.params.id)
@@ -136,9 +152,7 @@ const App = () => {
       {user === null
         ? loginForm()
         : <div>
-          <Link style={padding} to='/'>Home</Link>
-          <Link style={padding} to='/users'>Users</Link>
-          <p>{user.name} logged in <button id='logout' onClick={() => handleLogout()}>Logout</button></p>
+          <Menu user={user} handleLogout={() => handleLogout()} />
           <Switch>
             <Route path='/users/:id'>
               <User user={matchedUser} />
