@@ -23,7 +23,6 @@ blogsRouter.get('/:id', async (req, res) => {
 // add new blog
 blogsRouter.post('/', async (req, res) => {
   const body = req.body;
-  // eslint-disable-next-line no-undef
   const decodedToken = jwt.verify(req.token, process.env.SECRET);
   if (!req.token || !decodedToken.id) {
     return res.status(401).json({
@@ -56,7 +55,6 @@ blogsRouter.post('/', async (req, res) => {
 
 // delete blog
 blogsRouter.delete('/:id', async (req, res) => {
-  // eslint-disable-next-line no-undef
   const decodedToken = jwt.verify(req.token, process.env.SECRET);
   if (!req.token || !decodedToken.id) {
     return res.status(401).json({
@@ -87,11 +85,28 @@ blogsRouter.put('/:id', async (req, res) => {
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: body.likes
+    likes: body.likes,
+    comments: body.comments
   };
 
-  const updatedNote = await Blog.findByIdAndUpdate(req.params.id, blog, { new: true });
-  res.json(updatedNote);
+  const updatedBlog = await Blog.findByIdAndUpdate(req.params.id, blog, { new: true });
+  res.json(updatedBlog);
+});
+
+// add comment
+blogsRouter.put('/:id/comments', async (req, res) => {
+  const body = req.body;
+
+  const blog = {
+    title: body.title,
+    author: body.author,
+    url: body.url,
+    likes: body.likes,
+    comments: body.comments
+  };
+
+  const updatedBlog = await Blog.findByIdAndUpdate(req.params.id, blog, { new: true });
+  res.json(updatedBlog);
 });
 
 module.exports = blogsRouter;
