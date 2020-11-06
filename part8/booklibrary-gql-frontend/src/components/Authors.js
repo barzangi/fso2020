@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState/*, useEffect*/ } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 
 import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries';
@@ -8,7 +8,7 @@ const Authors = (props) => {
   const [born, setBorn] = useState('');
 
   const authors = useQuery(ALL_AUTHORS);
-  const [ updateAuthor, result ] = useMutation(EDIT_AUTHOR);
+  const [ updateAuthor/*, result*/ ] = useMutation(EDIT_AUTHOR);
 
   const submit = (event) => {
     event.preventDefault();
@@ -19,6 +19,7 @@ const Authors = (props) => {
     setBorn('');
   };
 
+  /*
   useEffect(() => {
     if (result.data && result.data.editAuthor === null) {
       props.setError('Author not found');
@@ -28,6 +29,7 @@ const Authors = (props) => {
   if (!props.show) {
     return null;
   }
+  */
 
   if (authors.loading) {
     return <div>Loading...</div>
@@ -62,13 +64,14 @@ const Authors = (props) => {
       </table>
       <h3>Set birth year</h3>
       <form onSubmit={submit}>
-        <div>
-          Name{' '}
-          <input
-            value={name}
-            onChange={({ target }) => setName(target.value)}
-          />
-        </div>
+        <label>
+          Name
+          <select value={name} onChange={({ target }) => setName(target.value)}>
+            {allAuthors.map(a =>
+              <option key={a.id} value={a.name}>{a.name}</option>
+            )}
+          </select>
+        </label>
         <div>
           Born{' '}
           <input
