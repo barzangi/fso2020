@@ -1,6 +1,27 @@
+const config = require('./utils/config');
 const { ApolloServer, UserInputError, gql } = require('apollo-server');
-const { v1: uuid } = require('uuid');
+const mongoose = require('mongoose');
+const Book = require('./models/book');
+const Author = require('./models/author');
 
+// const { v1: uuid } = require('uuid');
+
+console.log('Connecting to', config.MONGODB_URI);
+
+mongoose.connect(config.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true
+})
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((error) => {
+    console.log('Error connecting to MongoDB', error.message);
+  });
+
+/*
 let authors = [
   {
     name: 'Robert Martin',
@@ -78,14 +99,15 @@ let books = [
     genres: ['classic', 'revolution']
   },
 ];
+*/
 
 const typeDefs = gql`
   type Book {
     title: String!
     published: Int!
-    author: String!
-    id: ID!
+    author: Author!
     genres: [String!]!
+    id: ID!
   }
   type Author {
     name: String!
@@ -115,12 +137,12 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    bookCount: () => books.length,
-    authorCount: () => authors.length,
-    allBooks: (root, args) => {
-      let getBooks = books;
+    bookCount: () => Book.collection.countDocuments(),
+    authorCount: () => Author.collection.countDocuments(),
+    allBooks: async (root, args) => {
+      let getBooks = await Book.find({}).populate('author', { name: 1, born: 1 });
       if (args.author) {
-        getBooks = getBooks.filter(b => b.author === args.author);
+        getBooks = getBooks.filter(b => b.author.name === args.author);
       }
       if (args.genre) {
         getBooks = getBooks.filter(b => b.genres.includes(args.genre));
@@ -128,40 +150,70 @@ const resolvers = {
       return getBooks;
     },
     allAuthors: () => {
-      return authors
+      return Author.find({});
     }
   },
   Author: {
-    bookCount: (root) => {
-      const getBooks = books.filter(b => b.author === root.name).length;
-      return getBooks;
+    bookCount: async (root) => {
+      const getBooks = await Book.find({}).populate('author', { name: 1 });
+      return getBooks.filter(b => b.author.name === root.name).length;
     }
   },
   Mutation: {
-    addBook: (root, args) => {
-      if (books.find(b => b.title === args.title)) {
-        throw new UserInputError('Title must be unique', {
-          invalidArgs: args.title
-        });
+    addBook: async (root, args) => {
+      // validation checks
+      if (args.title.length < 2) {
+        throw new UserInputError(
+          'Book title cannot be shorter than 2 characters',
+          { invalidArgs: args }
+        );
       }
-      const book = { ...args, id: uuid() };
-      books = books.concat(book);
-      // if new author, add
-      if (!authors.find(a => a.name === args.author)) {
-        const author = {
-          name: args.author,
-          id: uuid()
-        };
-        authors = authors.concat(author);
+      if (args.author.length < 4) {
+        throw new UserInputError(
+          'Author name cannot be shorter than 4 characters',
+          { invalidArgs: args }
+        );
+      }
+      const checkAuthorExists = async authorName => {
+        const authorExists = await Author.findOne({ name: authorName });
+        if (!authorExists) {
+          // if author does not exist, add to list
+          const author = new Author({ name: authorName, born: null });
+          try {
+            const savedAuthor = author.save();
+            return savedAuthor;
+          } catch (error) {
+            throw new UserInputError(error.message, {
+              invalidArgs: args
+            });
+          }
+        } else {
+          return authorExists;
+        }
+      };
+
+      const getAuthor = await checkAuthorExists(args.author);
+      const book = new Book({ ...args, author: getAuthor });
+      try {
+        await book.save();
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args
+        })
       }
       return book;
     },
-    editAuthor: (root, args) => {
-      const author = authors.find(a => a.name === args.name);
-      if (!author) return null;
-      const updatedAuthor = { ...author, born: args.setBornTo };
-      authors = authors.map(a => a.name === args.name ? updatedAuthor : a);
-      return updatedAuthor;
+    editAuthor: async (root, args) => {
+      const author = await Author.findOne({ name: args.name });
+      author.born = args.setBornTo;
+      try {
+        await author.save();
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args
+        });
+      }
+      return author;
     }
   }
 };
