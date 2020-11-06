@@ -1,20 +1,39 @@
-import React from 'react';
-import { useQuery } from '@apollo/client';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
 
-import { ALL_AUTHORS } from '../queries';
+import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries';
 
 const Authors = (props) => {
-  const result = useQuery(ALL_AUTHORS);
+  const [name, setName] = useState('');
+  const [born, setBorn] = useState('');
+
+  const authors = useQuery(ALL_AUTHORS);
+  const [ updateAuthor, result ] = useMutation(EDIT_AUTHOR);
+
+  const submit = (event) => {
+    event.preventDefault();
+
+    updateAuthor({ variables: { name, born: Number(born) } });
+
+    setName('');
+    setBorn('');
+  };
+
+  useEffect(() => {
+    if (result.data && result.data.editAuthor === null) {
+      props.setError('Author not found');
+    }
+  }, [result.data]) // eslint-disable-line
 
   if (!props.show) {
     return null;
   }
 
-  if (result.loading) {
+  if (authors.loading) {
     return <div>Loading...</div>
   }
 
-  const authors = result.data.allAuthors;
+  const allAuthors = authors.data.allAuthors;
 
   return (
     <div>
@@ -32,7 +51,7 @@ const Authors = (props) => {
               Books
             </th>
           </tr>
-          {authors.map(a =>
+          {allAuthors.map(a =>
             <tr key={a.name}>
               <td>{a.name}</td>
               <td>{a.born}</td>
@@ -41,7 +60,25 @@ const Authors = (props) => {
           )}
         </tbody>
       </table>
-
+      <h3>Set birth year</h3>
+      <form onSubmit={submit}>
+        <div>
+          Name{' '}
+          <input
+            value={name}
+            onChange={({ target }) => setName(target.value)}
+          />
+        </div>
+        <div>
+          Born{' '}
+          <input
+            value={born}
+            type='number'
+            onChange={({ target }) => setBorn(target.value)}
+          />
+        </div>
+        <button type='submit'>Update author</button>
+      </form>
     </div>
   );
 };

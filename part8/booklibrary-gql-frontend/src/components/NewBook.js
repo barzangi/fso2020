@@ -43,21 +43,21 @@ const NewBook = (props) => {
       <h2>Add book</h2>
       <form onSubmit={submit}>
         <div>
-          title
+          Title{' '}
           <input
             value={title}
             onChange={({ target }) => setTitle(target.value)}
           />
         </div>
         <div>
-          author
+          Author{' '}
           <input
             value={author}
             onChange={({ target }) => setAuhtor(target.value)}
           />
         </div>
         <div>
-          published
+          Published{' '}
           <input
             type='number'
             value={published}
@@ -69,12 +69,12 @@ const NewBook = (props) => {
             value={genre}
             onChange={({ target }) => setGenre(target.value)}
           />
-          <button onClick={addGenre} type="button">add genre</button>
+          <button onClick={addGenre} type="button">Add genre</button>
         </div>
         <div>
-          genres: {genres.join(' ')}
+          Genres: {genres.join(' ')}
         </div>
-        <button type='submit'>create book</button>
+        <button type='submit'>Create book</button>
       </form>
     </div>
   );
