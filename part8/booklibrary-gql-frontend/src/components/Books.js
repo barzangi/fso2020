@@ -47,7 +47,7 @@ const Books = (props) => {
           )}
         </tbody>
       </table>
-      <h3>Filter by genre</h3>
+      <h3>Filter by genre: {genreFilter ? genreFilter : 'all'}</h3>
       <button onClick={() => setGenreFilter('')}>all</button>
       {uniqueGenres.map(genre =>
         <button
