@@ -1,23 +1,33 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
+import { useHistory } from 'react-router-dom';
 
-import { ALL_BOOKS, USER } from '../queries';
+import { USER } from '../queries';
 
-const Recommended = (props) => {
-  const result = useQuery(ALL_BOOKS);
-  const user = useQuery(USER);
+const Recommended = ({ booksResult, setError }) => {
+  const userResult = useQuery(USER);
+  const history = useHistory();
+  console.log('userResult', userResult);
 
-  if (!props.show) {
-    return null;
-  }
-
-  if (result.loading) {
+  if (booksResult.loading) {
     return <div>Loading...</div>
   }
 
-  const books = result.data.allBooks;
+  const books = booksResult.data.allBooks;
 
-  const favGenre = user.data.me.favGenre;
+  let favGenre;
+
+  if (!userResult.data || !userResult.data.me) {
+    favGenre = null;
+  } else {
+    favGenre = userResult.data.me.favGenre;
+  }
+
+  if (!favGenre) {
+    history.push('/');
+    setError('An error occurred');
+    return null;
+  }
 
   const userBooks = books.filter(b => b.genres.includes(favGenre));
 

@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
-import { useQuery } from '@apollo/client';
 
-import { ALL_BOOKS } from '../queries';
-
-const Books = (props) => {
-  const result = useQuery(ALL_BOOKS);
+const Books = ({ booksResult }) => {
   const [genreFilter, setGenreFilter] = useState('');
 
-  if (!props.show) {
-    return null;
-  }
-
-  if (result.loading) {
+  if (booksResult.loading) {
     return <div>Loading...</div>
   }
 
-  const books = result.data.allBooks;
+  const books = booksResult.data.allBooks;
 
   const uniqueGenres = [ ...new Set(books.map(b => b.genres.map(g => g)).flat())];
 

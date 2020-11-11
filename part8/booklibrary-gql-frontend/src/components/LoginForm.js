@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { LOGIN } from '../queries';
 
-const LoginForm = (props) => {
+const LoginForm = ({ setError, setToken }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const history = useHistory();
 
   const [ login, result ] = useMutation(LOGIN, {
     onError: (error) => {
-      props.setError(error.graphQLErrors[0].message);
+      setError(error.graphQLErrors[0].message);
     }
   });
 
   useEffect(() => {
     if (result.data) {
       const token = result.data.login.value;
-      props.setToken(token);
+      setToken(token);
       localStorage.setItem('booklibrary-user-token', token);
+      history.push('/');
     }
   }, [result.data]); // eslint-disable-line
-
-  if (!props.show) {
-    return null;
-  }
 
   const submit = (event) => {
     event.preventDefault();
@@ -30,7 +29,6 @@ const LoginForm = (props) => {
     login({ variables: { username, password } });
     setUsername('');
     setPassword('');
-    props.setPage('authors');
   };
 
   return (

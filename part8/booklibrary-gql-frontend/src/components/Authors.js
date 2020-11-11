@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@apollo/client';
 
 import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries';
 
-const Authors = (props) => {
+const Authors = ({ token }) => {
   const [name, setName] = useState('');
   const [born, setBorn] = useState('');
 
@@ -18,10 +18,6 @@ const Authors = (props) => {
       setBorn('');
     }
   };
- 
-  if (!props.show) {
-    return null;
-  }
 
   if (authors.loading) {
     return <div>Loading...</div>
@@ -54,7 +50,7 @@ const Authors = (props) => {
           )}
         </tbody>
       </table>
-      {props.token
+      {token
         ?
           <>
             <h3>Set birth year</h3>

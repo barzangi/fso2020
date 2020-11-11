@@ -3,7 +3,7 @@ import { useMutation } from '@apollo/client';
 
 import { ALL_BOOKS, ALL_AUTHORS, CREATE_BOOK } from '../queries';
 
-const NewBook = (props) => {
+const NewBook = ({ setError }) => {
   const [title, setTitle] = useState('');
   const [author, setAuhtor] = useState('');
   const [published, setPublished] = useState('');
@@ -13,13 +13,9 @@ const NewBook = (props) => {
   const [ createBook ] = useMutation(CREATE_BOOK, {
     refetchQueries: [ { query: ALL_BOOKS }, { query: ALL_AUTHORS } ],
     onError: (error) => {
-      props.setError(error.graphQLErrors[0].message)
+      setError(error.graphQLErrors[0].message);
     }
   });
-
-  if (!props.show) {
-    return null;
-  }
 
   const submit = (event) => {
     event.preventDefault();
