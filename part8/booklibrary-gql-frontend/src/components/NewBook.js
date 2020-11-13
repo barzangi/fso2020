@@ -3,7 +3,7 @@ import { useMutation } from '@apollo/client';
 
 import { ALL_BOOKS, ALL_AUTHORS, CREATE_BOOK } from '../queries';
 
-const NewBook = ({ setError }) => {
+const NewBook = ({ setError, updateCacheWith }) => {
   const [title, setTitle] = useState('');
   const [author, setAuhtor] = useState('');
   const [published, setPublished] = useState('');
@@ -14,6 +14,9 @@ const NewBook = ({ setError }) => {
     refetchQueries: [ { query: ALL_BOOKS }, { query: ALL_AUTHORS } ],
     onError: (error) => {
       setError(error.graphQLErrors[0].message);
+    },
+    update: (store, response) => {
+      updateCacheWith(response.data.addBook);
     }
   });
 
@@ -64,7 +67,7 @@ const NewBook = ({ setError }) => {
           <input
             value={genre}
             onChange={({ target }) => setGenre(target.value)}
-          />
+          />{' '}
           <button onClick={addGenre} type="button">Add genre</button>
         </div>
         <div>
