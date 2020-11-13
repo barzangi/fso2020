@@ -90,7 +90,7 @@ const resolvers = {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
-      let getBooks = await Book.find({}).populate('author', { name: 1, born: 1 });
+      let getBooks = await Book.find({}).populate('author', { name: 1, born: 1, bookCount: 1 });
       if (args.author) {
         getBooks = getBooks.filter(b => b.author.name === args.author);
       }
@@ -106,12 +106,16 @@ const resolvers = {
       return context.currentUser;
     }
   },
+  /*
   Author: {
-    bookCount: async (root) => {
-      const getBooks = await Book.find({}).populate('author', { name: 1 });
-      return getBooks.filter(b => b.author.name === root.name).length;
+    bookCount: (root) => {
+      console.log('bookCount');
+      return root.booksBy.length;
+      // const getBooks = await Book.find({}).populate('author', { name: 1 });
+      // return getBooks.filter(b => b.author.name === root.name).length;
     }
   },
+  */
   Mutation: {
     addBook: async (root, args, { currentUser }) => {
       // if no logged in user, throw error
@@ -138,7 +142,7 @@ const resolvers = {
         const authorExists = await Author.findOne({ name: authorName });
         if (!authorExists) {
           // if author does not exist, add to list
-          const author = new Author({ name: authorName, born: null });
+          const author = new Author({ name: authorName, born: null, bookCount: 0 });
           try {
             const savedAuthor = author.save();
             return savedAuthor;
@@ -156,6 +160,8 @@ const resolvers = {
       const book = new Book({ ...args, author: getAuthor });
       try {
         await book.save();
+        getAuthor.bookCount = getAuthor.bookCount + 1;
+        await getAuthor.save();
       } catch (error) {
         throw new UserInputError(error.message, {
           invalidArgs: args
